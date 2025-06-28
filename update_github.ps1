@@ -40,11 +40,11 @@ if ($gitStatus) {
 Write-Host ""
 Write-Host "📊 Repository Statistics:" -ForegroundColor White
 try {
-    $repoInfo = gh repo view --json stargazerCount,forkCount,openIssues
+    $repoInfo = gh repo view --json stargazerCount,forkCount,issues
     $repo = $repoInfo | ConvertFrom-Json
     Write-Host "⭐ Stars: $($repo.stargazerCount)" -ForegroundColor Gray
     Write-Host "🍴 Forks: $($repo.forkCount)" -ForegroundColor Gray
-    Write-Host "🐛 Issues: $($repo.openIssues)" -ForegroundColor Gray
+    Write-Host "🐛 Open Issues: $($repo.issues.totalCount)" -ForegroundColor Gray
 } catch {
     Write-Host "Unable to fetch repository statistics" -ForegroundColor Gray
 }
