@@ -1,0 +1,23 @@
+# Enhanced ChuhaBot Swarm Framework - Requirements
+# ================================================
+
+# Core scientific computing
+numpy>=1.21.0
+
+# Type hints support (for older Python versions)
+typing-extensions>=4.0.0
+
+# Optional: For advanced visualization and analysis
+matplotlib>=3.5.0
+scipy>=1.7.0
+
+# Optional: For machine learning extensions
+scikit-learn>=1.0.0
+
+# Optional: For network analysis and communication simulation
+networkx>=2.6.0
+
+# Development and testing
+pytest>=6.0.0
+black>=21.0.0
+flake8>=4.0.0

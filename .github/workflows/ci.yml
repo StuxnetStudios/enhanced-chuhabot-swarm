@@ -1,0 +1,177 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9, '3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov flake8
+
+    - name: Lint with flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 controllers/enhanced_swarm_framework --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 controllers/enhanced_swarm_framework --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test framework setup
+      run: |
+        python setup_enhanced_framework.py
+
+    - name: Test demo features (no Webots)
+      run: |
+        python demo_enhanced_features.py
+      continue-on-error: true  # Demo may fail without Webots
+
+    - name: Run unit tests
+      run: |
+        python -m pytest tests/ --cov=controllers/enhanced_swarm_framework --cov-report=xml
+      continue-on-error: true  # Tests may fail without full Webots environment
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  build-c-controller:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install build tools (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make
+
+    - name: Install build tools (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Install build tools (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        xcode-select --install || true
+
+    - name: Check C controller syntax (Ubuntu/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        cd controllers/chuha_c_controller
+        gcc -fsyntax-only -std=c99 -Wall chuha_c_controller.c
+      continue-on-error: true  # May fail without Webots headers
+
+    - name: Test requirements check (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cd controllers/chuha_c_controller
+        ./check_requirements.bat
+      shell: cmd
+      continue-on-error: true
+
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install documentation dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install markdown
+
+    - name: Check documentation
+      run: |
+        # Check that key documentation files exist
+        test -f README_GITHUB.md
+        test -f ENHANCED_README.md
+        test -f RELEASE_NOTES.md
+        test -f controllers/chuha_c_controller/README.md
+
+    - name: Validate Markdown
+      run: |
+        python -c "
+        import markdown
+        files = ['README_GITHUB.md', 'ENHANCED_README.md', 'RELEASE_NOTES.md']
+        for file in files:
+            try:
+                with open(file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    markdown.markdown(content)
+                print(f'✓ {file} is valid Markdown')
+            except Exception as e:
+                print(f'✗ {file} has issues: {e}')
+                exit(1)
+        "
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Run security scan with bandit
+      run: |
+        bandit -r controllers/enhanced_swarm_framework/ -f json -o bandit-report.json
+      continue-on-error: true
+
+    - name: Check for known security vulnerabilities
+      run: |
+        safety check --json --output safety-report.json
+      continue-on-error: true
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
