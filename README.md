@@ -4,6 +4,8 @@
 [![Python](https://img.shields.io/badge/Python-3.6%2B-green.svg)](https://www.python.org/)
 [![C](https://img.shields.io/badge/C-C99-blue.svg)](https://en.wikipedia.org/wiki/C99)
 [![Webots](https://img.shields.io/badge/Webots-R2024a%2B-orange.svg)](https://cyberbotics.com/)
+[![GitHub Release](https://img.shields.io/github/v/release/StuxnetStudios/enhanced-chuhabot-swarm?color=brightgreen)](https://github.com/StuxnetStudios/enhanced-chuhabot-swarm/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/StuxnetStudios/enhanced-chuhabot-swarm?style=social)](https://github.com/StuxnetStudios/enhanced-chuhabot-swarm)
 
 > **Next-generation intelligent swarm robotics framework with dual Python/C implementation**
 
@@ -41,7 +43,7 @@ A comprehensive, modular, and high-performance swarm robotics framework that tra
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/enhanced-chuhabot-swarm.git
+git clone https://github.com/StuxnetStudios/enhanced-chuhabot-swarm.git
 cd enhanced-chuhabot-swarm
 ```
 
@@ -182,9 +184,9 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/enhanced-chuhabot-swarm/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/enhanced-chuhabot-swarm/discussions)
-- **Documentation**: [Wiki](https://github.com/yourusername/enhanced-chuhabot-swarm/wiki)
+- **Issues**: [GitHub Issues](https://github.com/StuxnetStudios/enhanced-chuhabot-swarm/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/StuxnetStudios/enhanced-chuhabot-swarm/discussions)
+- **Documentation**: [Wiki](https://github.com/StuxnetStudios/enhanced-chuhabot-swarm/wiki)
 
 ---
 
